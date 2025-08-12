@@ -1,96 +1,79 @@
 # English Vocabulary Helper
-
-**`eng`** — минималистичный CLI-словарь для запоминания английских слов с контекстом и тренировкой.
+**`eng`** is a minimal CLI dictionary for memorising English words together with their translations and example contexts.
 
 ![1.png](./pictures/1.png)
 
----
-
-## 🚀 Установка и запуск
+## 🚀 Installation & Launch
 ```bash
-# Склонируйте или скопируйте себе
+# Clone or copy the repo
 git clone https://github.com/yourname/english ~/projects/python/english
-# Добавьте алиас в ~/.bashrc или ~/.zshrc
+
+# Add an alias to ~/.bashrc or ~/.zshrc
 echo 'alias eng="python3 $HOME/projects/python/english/main.py"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
----
-
-## 📖 Быстрый старт
+## 📖 Quick Start
 ```bash
-# Добавить слово без контекста
+# Add a word without context
 eng -n apple яблоко
 
-# Добавить слово с контекстом
+# Add a word with context
 eng -n apple яблоко An apple a day keeps the doctor away.
 
-# Посмотреть все слова
+# List all words
 eng -l
 
-# Тренировка: перевод случайного слова
+# Training: translate a random word
 eng -t
 
-# Найти слово с автодополнением по Tab
+# Search with tab-completion
 eng -f
-> Введите слово: app<tab>
+> Enter word: app<Tab>
 apple - яблоко [An apple a day keeps the doctor away.]
 
-# Удалить
+# Delete
 eng -d apple
 ```
 
 ![2.png](./pictures/2.png)
 
----
+## 🎨 Colour Legend
+| Output       | Colour      | Purpose                 |
+| :----------- | :---------- | :---------------------- |
+| English word | **cyan**    | easy visual scanning    |
+| Translation  | **yellow**  | quick reading           |
+| Context      | **magenta** | visible but unobtrusive |
 
-## 🎨 Цветовая кодировка
-
-| Что выводится    | Цвет        | Назначение           |
-| :--------------- | :---------- | :------------------- |
-| английское слово | **cyan**    | легко искать глазами |
-| перевод          | **yellow**  | быстро читается      |
-| контекст         | **magenta** | не мешает, но виден  |
-
----
-## 📂 Формат файла словаря
-
-Файл `english.md` хранится в plain-text:
+## 📂 Dictionary File Format
+The file `english.md` is plain-text:
 ```
 apple   - яблоко [An apple a day keeps the doctor away.]
 banana  - банан
 cat     - кот [The cat sat on the mat.]
 ```
+Words are automatically grouped by first letter and aligned when the file is formatted.
 
-Слова автоматически группируются по первой букве и выравниваются при форматировании.
+## 🛠 Commands
+| Flag       | Example                                    | Description                            |
+| :--------- | :----------------------------------------- | :------------------------------------- |
+| `-n`       | `eng -n run бежать He runs every morning.` | add a word (and optional context)      |
+| `-d`       | `eng -d run`                               | delete a word                          |
+| `-s`       | `eng -s app`                               | show words starting with `app`         |
+| `-t`       | `eng -t`                                   | training: translate a random word      |
+| `-l`       | `eng -l`                                   | list the entire dictionary             |
+| `-f`       | `eng -f`                                   | interactive search with tab-completion |
+| `-o`       | `eng -o`                                   | open the dictionary in `less`          |
+| `--format` | `eng --format`                             | re-format the file (sort & align)      |
 
----
 
-## 🛠 Команды
-
-| Ключ       | Пример                                     | Описание                                          |
-| :--------- | :----------------------------------------- | :------------------------------------------------ |
-| `-n`       | `eng -n run бежать He runs every morning.` | добавить слово и (опц.) контекст                  |
-| `-d`       | `eng -d run`                               | удалить слово                                     |
-| `-s`       | `eng -s app`                               | показать слова, начинающиеся на `app`             |
-| `-t`       | `eng -t`                                   | тренировка: перевод случайного слова              |
-| `-l`       | `eng -l`                                   | вывести весь словарь                              |
-| `-f`       | `eng -f`                                   | интерактивный поиск с автодополнением             |
-| `-o`       | `eng -o`                                   | просмотр словаря через `less`                     |
-| `--format` | `eng --format`                             | переформатировать файл (сортировка, выравнивание) |
-
----
-
-## ❗ Если слово уже есть
+## ❗ Word Already Exists
 ```
-$ eng -n apple фрукт
-Слыш, тупой Даун, такое слово уже есть:
-apple - яблоко [An apple a day keeps the doctor away.]
+Hey, dumb Down, there's already a word like that:
 ```
 ![3.png](./pictures/3.png)
 
----
-## 🤝 Зависимости
+## 🤝 Dependencies
 `pip install colorama`
 
 `pip install argparse`

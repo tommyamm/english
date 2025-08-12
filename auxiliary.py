@@ -1,39 +1,41 @@
 import os
-import random
 import re
-from colorama import Fore, Style
-from typing import Dict, Optional, Tuple
+import random
+
+from typing     import Dict, Optional, Tuple
+from colorama   import Fore, Style
 
 russian, context = 0, 1
 
-def printWord(dictionary: Dict[str, Tuple[str, str]], eng: str, format: bool=True) -> None:
+def print_word(dictionary: Dict[str, Tuple[str, str]], eng: str, format: bool=True) -> None:
     if eng not in dictionary:
         return
     rus = dictionary[eng][russian]
     ctx = dictionary[eng][context]
-    lEnglish = lenLongestEgnlish(dictionary) if format is True else len(eng)
-    lRussia = lenLongestRussian(dictionary) if format is True else len(rus)
+
+    maxEngWidth = max_eng_len(dictionary) if format else len(eng)
+    maxEngWidth = max_rus_len(dictionary) if format else len(eng)
 
     print(  
-        f"{Fore.LIGHTCYAN_EX}{eng:^{lEnglish}}{Style.RESET_ALL} - " +
-        f"{Fore.LIGHTYELLOW_EX}{rus:^{lRussia}}{Style.RESET_ALL}" +
+        f"{Fore.LIGHTCYAN_EX}{eng:^{maxEngWidth}}{Style.RESET_ALL} - " +
+        f"{Fore.LIGHTYELLOW_EX}{rus:^{maxEngWidth}}{Style.RESET_ALL}" +
         (f" {Fore.LIGHTMAGENTA_EX}[{ctx}]{Style.RESET_ALL}" if ctx else "")
     )
 
-def makeDict(PATH: str) -> Dict[str, Tuple[str, Optional[str]]]:
+def make_dict(PATH: str) -> Dict[str, Tuple[str, Optional[str]]]:
     result = {}
     if not os.path.exists(PATH):
         return result
     with open(PATH, "r", encoding="utf-8") as file:
         for line in file:
-            parsed = unpackLine(line)
+            parsed = unpack_line(line)
             if parsed is None:
                 continue
             word, translation, context = parsed
             result[word] = (translation, context)
     return result
 
-def unpackLine(line: str) -> Optional[Tuple[str, str, Optional[str]]]:
+def unpack_line(line: str) -> Optional[Tuple[str, str, Optional[str]]]:
     line = line.strip()
     if not line or line.startswith('#'):
         return None
@@ -44,7 +46,7 @@ def unpackLine(line: str) -> Optional[Tuple[str, str, Optional[str]]]:
     word = left.strip()
     right = right.strip()
 
-    # Ищем контекст в квадратных скобках
+    # Looking for the context in square brackets
     match = re.search(r'\[(.*)\]$', right)
     if match:
         translation = right[:match.start()].strip()
@@ -54,13 +56,13 @@ def unpackLine(line: str) -> Optional[Tuple[str, str, Optional[str]]]:
         context = None
     return word, translation, context
 
-def lenLongestEgnlish(dictionary: Dict[str, Tuple[str, str]]) -> int:
+def max_eng_len(dictionary: Dict[str, Tuple[str, str]]) -> int:
     return max((len(word) for word in dictionary), default=0)
 
-def lenLongestRussian(dictionary: Dict[str, Tuple[str, str]]) -> int:
+def max_rus_len(dictionary: Dict[str, Tuple[str, str]]) -> int:
     return max((len(word[0]) for word in dictionary.values()), default=0)
 
-def formatFile(PATH: str, dictionary: Dict[str, Tuple[str, Optional[str]]]) -> None:
+def format_file(PATH: str, dictionary: Dict[str, Tuple[str, Optional[str]]]) -> None:
     mostLength = max(len(w) for w in dictionary) if dictionary else 0
     sortDict = sorted(dictionary, key=lambda w: w.lower())
     lastLetter = None
@@ -79,80 +81,86 @@ def formatFile(PATH: str, dictionary: Dict[str, Tuple[str, Optional[str]]]) -> N
                 file.write(f"{word:<{mostLength}} - {translation}\n")
 
 def force_format(PATH: str) -> None:
-    dictionary = makeDict(PATH)
-    formatFile(PATH, dictionary)
-    print("Файл отформатирован.")
+    dictionary = make_dict(PATH)
+    format_file(PATH, dictionary)
+    print("The file is formatted.")
 
-def addWord(PATH: str, eng: str, rus: str, context: Optional[str] = None) -> None:
-    dictionary = makeDict(PATH)
+def add_word(PATH: str, eng: str, rus: str, context: Optional[str] = None) -> None:
+    dictionary = make_dict(PATH)
 
     if eng in dictionary:
-        print(f"Слыш, тупой Даун, такое слово уже есть:")
-        printWord(dictionary, eng, False)
+        print(f"Hey, dumb Down, there's already a word like that:")
+        print_word(dictionary, eng, False)
         return
     
     dictionary[eng] = (rus, context)
-    formatFile(PATH, dictionary)
+    format_file(PATH, dictionary)
 
-    print("Добавлено:")
-    printWord(dictionary, eng, False)
+    print("Added:")
+    print_word(dictionary, eng, False)
 
-def deleteWord(PATH: str, eng: str) -> None:
-    dictionary = makeDict(PATH)
+def delete_word(PATH: str, eng: str) -> None:
+    dictionary = make_dict(PATH)
 
     if eng in dictionary:
-        print("Удалено:")
-        printWord(dictionary, eng, False)
+        print("Deleted:")
+        print_word(dictionary, eng, False)
         del dictionary[eng]
-        formatFile(PATH, dictionary)
+        format_file(PATH, dictionary)
     else:
-        print("Слово не найдено")
+        print("The word was not found!")
 
-def showByLetter(PATH: str, letter: str) -> None:
-    dictionary = makeDict(PATH)
+def show_by_letter(PATH: str, letter: str) -> None:
+    dictionary = make_dict(PATH)
     letter = letter.lower()
     words = [w for w in sorted(dictionary, key=lambda w: w.lower()) if w.lower().startswith(letter)]
     if not words:
-        print("Нет слов на такую букву")
+        print("There are no words for such a letter!")
         return
 
     for w in words:
-        printWord(dictionary, w)
+        print_word(dictionary, w)
 
 def train(PATH: str) -> None:
-    dictionary = makeDict(PATH)
+    dictionary = make_dict(PATH)
     if not dictionary:
-        print("Словарь пуст")
+        print("The dictionary is empty!")
         return
     word = random.choice(list(dictionary.keys()))
-    answer = input(f"Переведи: {Fore.LIGHTCYAN_EX}{word}{Style.RESET_ALL}\n> ").strip()
+    answer = input(f"Translate it: {Fore.LIGHTCYAN_EX}{word}{Style.RESET_ALL}\n> ").strip()
     if answer.lower() == dictionary[word][0].lower():
-        print(f"{Fore.LIGHTGREEN_EX}✓ Правильно!{Style.RESET_ALL}")
+        print(f"{Fore.LIGHTGREEN_EX}✓ Correctly!{Style.RESET_ALL}")
     else:
         print(f"{Fore.LIGHTRED_EX}✗ Неправильно{Style.RESET_ALL}.", end="")
-        print(f"Правильный ответ: {Fore.LIGHTYELLOW_EX}{dictionary[word][0]}{Style.RESET_ALL}")
+        print(f"Right answer: {Fore.LIGHTYELLOW_EX}{dictionary[word][0]}{Style.RESET_ALL}")
 
-def listAll(PATH: str) -> None:
-    dictionary = makeDict(PATH)
+def list_all(PATH: str) -> None:
+    dictionary = make_dict(PATH)
     if not dictionary:
-        print("Словарь пуст")
+        print("The dictionary is empty!")
         return
-        
+    
+    last_word = None
     for word in sorted(dictionary, key=lambda w: w.lower()):
-        printWord(dictionary, word)
+        if last_word is None:
+            last_word = word
+        if last_word[0] != word[0]:
+            print()   
+            last_word = word 
+        print_word(dictionary, word)
 
-def findWord(PATH: str, query: str) -> None:
-    dictionary = makeDict(PATH)
+def find_word(PATH: str, query: str) -> None:
+    dictionary = make_dict(PATH)
     matches = [w for w in dictionary if w.lower().startswith(query.lower())]
     if not matches:
-        print("Совпадений не найдено")
+        print("No matches found!")
         return
     
     for w in matches:
-        printWord(dictionary, w)
+        print_word(dictionary, w)
 
-def openDict(PATH: str) -> None:
+def open_dict(PATH: str) -> None:
     if not os.path.exists(PATH):
-        print("Файл словаря не найден")
+        print("The dictionary file was not found!")
         return
     os.system(f"less {PATH}")

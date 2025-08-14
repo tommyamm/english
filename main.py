@@ -10,8 +10,6 @@ def main():
     parser.add_argument("-l", action="store_true", help="output the entire dictionary")
     parser.add_argument("-s", metavar="PREFIX", help="words with a prefix beginning")
     parser.add_argument("-t", action="store_true", help="training")
-
-    # parser.add_argument("-f", action="store_true", help="find (with autocomplete)")
     args = parser.parse_args()
 
     if args.n:

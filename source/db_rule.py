@@ -2,11 +2,10 @@ import os
 import sqlite3
 from typing import Optional, Any, Dict
 from contextlib import contextmanager
-
+from constants import DB_NAME
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_NAME = os.path.join(SCRIPT_DIR, "..", "database", "localdb.sqlite")
-DB_NAME="/home/stas/projects/python/english/database/localdb.sqlite"
+DB_NAME = os.path.join(SCRIPT_DIR, "..", "database", DB_NAME)
 
 class OperationResult:
     def __init__(

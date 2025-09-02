@@ -2,7 +2,7 @@
 import sys
 from auxiliary import *
 
-# PS: unfortunately, arparse did not fit
+# PS: unfortunately, argparse did not fit
 
 USAGE = """\
 Usage: eng [-n ENG RUS [CONTEXT]] [-d WORD] [-l] [-s PREFIX] [-t]

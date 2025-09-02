@@ -2,16 +2,17 @@
 **`eng`** is a minimal CLI dictionary for memorising English words together with their translations and example contexts.
 
 ![1.png](./pictures/1.png)
-
 ## 🚀 Installation & Launch
+To set up the application, run the `setup.sh` script:
 ```bash
-# Clone or copy the repo
-git clone https://github.com/yourname/english ~/projects/python/english
-
-# Add an alias to ~/.bashrc or ~/.zshrc
-echo 'alias eng="python3 $HOME/projects/python/english/main.py"' >> ~/.bashrc
-source ~/.bashrc
+./setup.sh
 ```
+This script will:
+1. Install necessary Python dependencies (`colorama`).
+2. Ensure the database directory exists.
+3. Initialize the SQLite database (`database/localdb.sqlite`) if it doesn't already exist.
+
+After running the script, you will be prompted to add an alias to your shell configuration (e.g., `~/.bashrc` or `~/.zshrc`) to easily run the `eng` command.
 
 ## 📖 Quick Start
 ```bash
@@ -29,7 +30,7 @@ eng -t
 
 # Search with tab-completion
 eng -f
-> Enter word: app<Tab>
+> Enter word:
 apple - яблоко [An apple a day keeps the doctor away.]
 
 # Delete
@@ -45,35 +46,31 @@ eng -d apple
 | Translation  | **yellow**  | quick reading           |
 | Context      | **magenta** | visible but unobtrusive |
 
-## 📂 Dictionary File Format
-The file `english.md` is plain-text:
-```
-apple   - яблоко [An apple a day keeps the doctor away.]
-banana  - банан
-cat     - кот [The cat sat on the mat.]
-```
-Words are automatically grouped by first letter and aligned when the file is formatted.
+## 📂 Database Structure
+Vocabulary is stored in a SQLite database at `database/localdb.sqlite`. The database contains a table `vocabulary` with the following columns:
+- `english` (TEXT, PRIMARY KEY): The English word.
+- `otherlg` (TEXT): The translation in another language (e.g., Russian).
+- `context` (TEXT): Optional context or example sentence for the word.
 
 ## 🛠 Commands
 | Flag       | Example                                    | Description                            |
 | :--------- | :----------------------------------------- | :------------------------------------- |
 | `-n`       | `eng -n run бежать He runs every morning.` | add a word (and optional context)      |
 | `-d`       | `eng -d run`                               | delete a word                          |
-| `-s`       | `eng -s app`                               | show words starting with `app`         |
+| `-e`       | `eng -e run бегать`                        | edit entry: word, [new translation], [new context] |
+| `-s`       | `eng -s app`                               | show words starting with `app`         |
 | `-t`       | `eng -t`                                   | training: translate a random word      |
 | `-l`       | `eng -l`                                   | list the entire dictionary             |
-| `-f`       | `eng -f`                                   | interactive search with tab-completion |
-| `-o`       | `eng -o`                                   | open the dictionary in `less`          |
-| `--format` | `eng --format`                             | re-format the file (sort & align)      |
 
+## How does training work:
+
+![4.png](./pictures/4.png)
 
 ## ❗ Word Already Exists
 ```
-Hey, dumb Down, there's already a word like that:
+Doctor's recommendation: Get checked for dementia.
 ```
 ![3.png](./pictures/3.png)
 
 ## 🤝 Dependencies
 `pip install colorama`
-
-`pip install argparse`

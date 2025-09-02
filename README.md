@@ -90,6 +90,6 @@ The uninstaller will:
 └── uninstall.sh
 ```
 
-If the database `eng_vocab.db` does not existWhen it is first accessed, it will be automatically created.
+If the database `eng_vocab.db` does not exist when it is first accessed, it will be created automatically.
 
 **PS**: For me, as a novice developer, this thing turned out to be useful. My English level is not up to the level of reading documentation fluently. However, after creating this tool and adding literally 30 unfamiliar words, I began to understand the text without any problems 👀

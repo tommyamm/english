@@ -101,13 +101,13 @@ class VocabularyDB:
                 cursor.execute(
                     """
                     SELECT 1 FROM dict 
-                    WHERE english = ? AND otherlg = ?
+                    WHERE english = ?
                     """,
-                    (english, otherlg)
+                    (english,)
                 )
                 if cursor.fetchone():
                     return OperationResult(
-                        success=False, message="Word pair already exists")
+                        success=False, message="Word already exists")
 
                 cursor.execute(
                     """

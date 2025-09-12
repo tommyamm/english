@@ -32,7 +32,7 @@ def add_word(eng: str, rus: str, context: Optional[str] = None) -> None:
         print(f"Added: {eng}")
     else:
         print("Doctor's recommendation: Get checked for dementia.")
-        show_by_letter(eng)
+        show_by_prefix(eng)
         # print(f"Error adding word: {result.message}")
 
 
@@ -53,7 +53,7 @@ def edit_word(eng: str, new_rus: Optional[str] = None,
         print(f"Error updating word: {result.message}")
 
 
-def show_by_letter(letter: str) -> None:
+def show_by_prefix(letter: str) -> None:
     """Outputs all words starting with the specified letter."""
     result = db.search_words(prefix=letter)
 
@@ -77,7 +77,7 @@ def get_rest(full_string, start_string):
     return ""
 
 
-def train() -> None:
+def training_mode() -> None:
     result = db.get_all_words()
 
     if not result.success or not result.data:

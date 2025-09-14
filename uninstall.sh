@@ -2,7 +2,6 @@
 
 APP_NAME="eng"
 INSTALL_DIR="/usr/local/bin"
-BASHRC="$HOME/.bashrc"
 
 echo "Starting uninstallation of $APP_NAME..."
 
@@ -16,16 +15,6 @@ if [ -L "$INSTALL_DIR/$APP_NAME" ]; then
 else
   echo "Symlink for $APP_NAME not found in $INSTALL_DIR."
 fi
-
-# # 2. Remove alias from .bashrc
-# ALIAS_LINE="alias $APP_NAME=\"$INSTALL_DIR/$APP_NAME\""
-# if grep -q "$ALIAS_LINE" "$BASHRC"; then
-#   echo "Removing alias from $BASHRC..."
-#   sed -i "\|$ALIAS_LINE|d" "$BASHRC"
-#   echo "Please run 'source $BASHRC' or restart your terminal to apply changes."
-# else
-#   echo "Alias for $APP_NAME not found in $BASHRC."
-# fi
 
 echo "Uninstallation of $APP_NAME completed. Database has not been touched."
 

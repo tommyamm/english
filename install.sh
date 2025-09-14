@@ -3,7 +3,6 @@
 APP_NAME="eng"
 APP_DIR="$(pwd)"
 INSTALL_DIR="/usr/local/bin"
-BASHRC="$HOME/.bashrc"
 
 # Function to check if a command exists
 command_exists () {
@@ -53,15 +52,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# # 5. Add alias to .bashrc
-# ALIAS_LINE="alias $APP_NAME=\"$INSTALL_DIR/$APP_NAME\""
-# if ! grep -q "$ALIAS_LINE" "$BASHRC"; then
-#   echo "Adding alias to $BASHRC..."
-#   echo "$ALIAS_LINE" >> "$BASHRC"
-#   echo "Please run 'source $BASHRC' or restart your terminal to use the new alias."
-# else
-#   echo "Alias already exists in $BASHRC."
-# fi
+# 5. Creating database directory
+echo "Creating database directory..."
+sudo mkdir -p database
+if [ $? -ne 0 ]; then
+echo "Failed to create database directory. Please check permissions."
+exit 1
+fi
 
 echo "Installation of $APP_NAME completed successfully!"
 

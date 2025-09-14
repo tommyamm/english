@@ -1,10 +1,114 @@
 import time
+import json
 import random
+import requests
+from pathlib import Path
 from colorama import Fore, Style
 from db_rule import VocabularyDB
 from typing import Dict, Optional, Any
 
+API_URL = ("https://generativelanguage.googleapis.com"
+           "/v1beta/models/gemini-1.5-flash:generateContent")
+CONF_PATH = Path(__file__).parent.parent / 'config.json'
+
 db = VocabularyDB()
+
+
+def load_config():
+    config_path = CONF_PATH
+    default_config = {
+        "AI_ASSIST_ENABLED": False,
+        "GOOGLE_GEMINI_API_KEY": ""
+    }
+    
+    try:
+        with open(config_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Creating a file with default settings
+        try:
+            with open(config_path, 'w', encoding='utf-8') as file:
+                json.dump(default_config, file, indent=2, ensure_ascii=False)
+        except Exception:
+            pass  # We silently ignore file creation errors.
+        return default_config
+
+
+config = load_config()
+AI_ASSIST_ENABLED = config.get("AI_ASSIST_ENABLED")
+GOOGLE_GEMINI_API_KEY = config.get("GOOGLE_GEMINI_API_KEY")
+
+
+def get_ai_context(word: str, timeout: int = 10) -> Optional[str]:
+    if not GOOGLE_GEMINI_API_KEY:
+        print(f"Error: Google Gemini API key is not set. Please use --ai-key to set it.")
+        return None
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": GOOGLE_GEMINI_API_KEY
+    }
+
+    prompt_text = f"""Create a concise English context sentence that demonstrates the meaning of the word '{word}'. 
+
+    Requirements:
+    - The sentence MUST contain the word '{word}' exactly as provided
+    - Keep the sentence short (45 characters maximum)
+    - The context should clearly illustrate the word's meaning through usage
+    - Use natural, everyday language
+    - Provide only the sentence, no additional explanation
+
+    Examples:
+    - Word: "apple" → "She bought a fresh apple from the local farmers market."
+    - Word: "innovation" → "The startup's innovation in AI technology impressed investors."
+    - Word: "navigate" → "He learned to navigate the complex subway system quickly."
+
+    Output format: Just the context sentence, nothing else."""
+
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": prompt_text
+                    }
+                ]
+            }
+        ]
+    }
+
+    try:
+        response = requests.post(API_URL, headers=headers, json=data, timeout=timeout)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        response_json = response.json()
+
+        if "candidates" in response_json and len(response_json["candidates"]) > 0:
+            candidate = response_json["candidates"][0]
+            if "content" in candidate and "parts" in \
+                candidate["content"] and len(candidate["content"]["parts"]) > 0:
+                return candidate["content"]["parts"][0]["text"].strip()
+        print(f"{Fore.LIGHTRED_EX}Error: Unexpected response "
+              "format from Gemini API.{Style.RESET_ALL}")
+        return None
+
+    except requests.exceptions.Timeout:
+        print(f"Error: Google Gemini API request timed out after {timeout} seconds. "
+              "Please check your internet connection or try again later.")
+        print(f"If you are using a VPN, try disabling it or switching locations.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error connecting to Google Gemini API: {e}")
+        print(f"Please check your API key and internet connection. If you are "
+              "using a VPN, try disabling it or switching locations.")
+        return None
+    except json.JSONDecodeError:
+        print(f"Error: Could not decode JSON response from Gemini API. "
+              f"Response: {response.text}")
+        return None
+    except Exception as e:
+        print(f"{Fore.LIGHTRED_EX}An unexpected error occurred while generating "
+              f"AI context for \'{word}\': {e}{Style.RESET_ALL}")
+        return None
 
 
 def print_word(word_data: Dict[str, Any], format: bool = True) -> None:
@@ -27,7 +131,17 @@ def print_word(word_data: Dict[str, Any], format: bool = True) -> None:
 
 
 def add_word(eng: str, rus: str, context: Optional[str] = None) -> None:
-    result = db.add_word(english=eng, otherlg=rus, context=context)
+    if AI_ASSIST_ENABLED and context is None:
+        print(f"Generating AI context for {eng}...")
+        ai_generated_context = get_ai_context(eng)
+        if ai_generated_context:
+            context = ai_generated_context
+            print(f"Context: {Fore.LIGHTMAGENTA_EX}[{context}]{Style.RESET_ALL}")
+        else:
+            print(f"Failed to generate AI context for {eng}. Adding without context.")
+
+    result = db.add_word(eng, rus, context)
+    
     if result.success:
         print(f"Added: {eng}")
     else:
@@ -58,12 +172,10 @@ def show_by_prefix(letter: str) -> None:
     result = db.search_words(prefix=letter)
 
     if not result.success:
-        print(f"{Fore.LIGHTRED_EX}Message from db {Style.RESET_ALL}: {result.message}")
+        print(f"Message from db {Style.RESET_ALL}: {result.message}")
         return
     if not result.data:
-        print(
-            f"{Fore.LIGHTRED_EX}No words found for letter {Style.RESET_ALL} \'{letter}\'"
-            )
+        print(f"No words found for letter \'{letter}\'")
         return
 
     for idx, word_data in enumerate(result.data, start=1):

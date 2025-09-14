@@ -1,11 +1,12 @@
-import os
 import sqlite3
+from pathlib import Path
+from constants import DB_NAME
 from typing import Optional, Any, Dict
 from contextlib import contextmanager
-from constants import DB_NAME
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_NAME = os.path.join(SCRIPT_DIR, "..", "database", DB_NAME)
+SCRIPT_DIR = Path(__file__).parent
+DB_NAME = SCRIPT_DIR.parent / "database" / DB_NAME
+
 
 class OperationResult:
     def __init__(

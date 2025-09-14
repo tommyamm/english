@@ -13,10 +13,24 @@ Options:
   -e WORD [-t RU] [-c CONTEXT] edit entry: RU and/or CTX
   -s PREFIX                    words with a PREFIX beginning
   -l                           output the entire dictionary
-  -t                           training mode\
+  -t                           training mode
+  --ai-state STATE             toggle AI context generation
+                               ON or OFF (default OFF)
+  --ai-key API_KEY             set Google Gemini API key\
 """
 
-actions = {"-h", "-n","-d","-e","-s","-l","-t"}
+actions = {"-h", "-n", "-d", "-e", "-s", "-l", "-t", "--ai-state", "--ai-key"}
+
+def save_config(config_data):
+    """Saving the configuration to a JSON file"""
+    try:
+        with open(CONF_PATH, 'w', encoding='utf-8') as f:
+            json.dump(config_data, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Error saving the configuration: {e}")
+        return False
+
 
 def parse_args(args):
     if not args:
@@ -35,6 +49,37 @@ def parse_args(args):
     if action == "-h":
         print(USAGE)
         return
+    elif action == "--ai-state":
+        if len(other) != 1:
+            print("Expected ON or OFF after --ai-state. See `eng -h`")
+            return
+
+        state, *other = other
+        config = load_config()
+
+        if state == "ON":
+            config["AI_ASSIST_ENABLED"] = True
+            if save_config(config):
+                print("AI context generation enabled.")
+        elif state == "OFF":
+            config["AI_ASSIST_ENABLED"] = False
+            if save_config(config):
+                print("AI context generation disabled.")
+        else:
+            print("Invalid state for --ai-state. Use ON or OFF. See `eng -h`")
+    elif action == "--ai-key":
+        if len(other) != 1:
+            print("Expected API_KEY after --ai-key. See `eng -h`")
+            return
+
+        api_key, *other = other
+        config = load_config()
+
+        config["GOOGLE_GEMINI_API_KEY"] = api_key
+        if save_config(config):
+            print("Google Gemini API key saved to config.json")
+        else:
+            print("Failed to save API key to config.json")
     elif action == "-n":
         if len(other) < 2:
             print("Expected arguments EN RU. See `eng -h`")
